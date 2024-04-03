@@ -4,11 +4,17 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import FormData from "./components/formData";
 import InventoryData from "./components/inventoriesData";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <>
-      <FormData />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/inventories/inventories" element={<InventoryData />} />
+          <Route path="/" element={<FormData />} />
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }
