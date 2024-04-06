@@ -38,7 +38,7 @@ function App() {
       .then((response) => response.json())
       .then((data) => setData(data))
       .catch((error) => console.error("Error fetching data:", error));
-      fetchData()
+    fetchData()
   }, []);
 
   const fetchData = async () => {
@@ -141,14 +141,12 @@ function App() {
   const handleModalClose = () => {
     setShowModal(false);
     setEditingItemId(null);
-    setFormData({
-      name: "",
-      email: "",
-      message: ""
-    });
+  
+
   };
 
-  const handleModalSubmit = async () => {
+  const handleModalSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
     try {
       const response = await fetch(`http://localhost:8080/api/v1/forms/${editingItemId}`, {
         method: "PUT",
@@ -157,11 +155,13 @@ function App() {
         },
         body: JSON.stringify(formData)
       });
+
       if (response.ok) {
         console.log("Form data updated successfully");
         toast.success('Form data updated successfully');
-        setShowModal(false);
-        fetchData();
+        setShowModal(false); // Close the modal
+        fetchData(); // Fetch updated data
+        window.location.reload();
       } else {
         console.error("Failed to update form data");
         toast.error('Failed to update form data');
@@ -236,7 +236,7 @@ function App() {
                         <td>{item.email}</td>
                         <td>{item.message}</td>
 
-                        <td className="justify-content-between align-items-center d-flex">
+                        <td className="justify-content-center align-items-center d-flex" style={{gap: 20}}>
                           {/* <button className="btn btn-primary" onClick={() => handleDelete(item._id)}>Edit</button> */}
                           <button className="btn btn-primary" onClick={() => handleEdit(item)}>Edit</button>
                           <button className="btn btn-danger" onClick={() => handleDelete(item._id)}>Delete</button>
@@ -251,7 +251,7 @@ function App() {
           </div>
         </div>
       </div>
-      
+
       {/* Edit Modal */}
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
@@ -273,7 +273,7 @@ function App() {
             </div>
             <div className="mb-3 justify-content-between d-flex" style={{ textAlign: "left", gap: 30 }}>
               <Button variant="primary" type="submit">
-                Update
+                {editingItemId ? 'Update' : 'Submit'}
               </Button>
             </div>
           </form>
