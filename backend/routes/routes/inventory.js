@@ -4,7 +4,7 @@ const Inventory = require("../models/Inventory");
 
 
 // Get all inventory items
-router.get("/", async (req, res) => {
+router.get("/inventories", async (req, res) => {
   try {
     const inventoryItems = await Inventory.find();
     res.json(inventoryItems);
@@ -15,13 +15,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get a specific inventory item
-router.get("/:id", getInventoryItem, (req, res) => {
-  res.json(res.inventoryItem);
-});
 
 // Create a new inventory item
-router.post("/", async (req, res) => {
+router.post("/inventories", async (req, res) => {
   const inventoryItem = new Inventory({
     productName: req.body.productName,
     category: req.body.category,
@@ -38,53 +34,38 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Update an existing inventory item
-router.patch("/:id", getInventoryItem, async (req, res) => {
-  if (req.body.productName != null) {
-    res.inventoryItem.productName = req.body.productName;
-  }
-  if (req.body.category != null) {
-    res.inventoryItem.category = req.body.category;
-  }
-  if (req.body.quantity != null) {
-    res.inventoryItem.quantity = req.body.quantity;
-  }
-  if (req.body.price != null) {
-    res.inventoryItem.price = req.body.price;
-  }
-  if (req.body.description != null) {
-    res.inventoryItem.description = req.body.description;
-  }
-  try {
-    const updatedInventoryItem = await res.inventoryItem.save();
-    res.json(updatedInventoryItem);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
 
 // Delete an inventory item
-router.delete("/:id", getInventoryItem, async (req, res) => {
+router.delete("/inventories/:id", async (req, res) => {
   try {
-    await res.inventoryItem.remove();
-    res.json({ message: "Inventory item deleted" });
+    const deletedItem = await Inventory.findByIdAndDelete(req.params.id);
+    if (!deletedItem) {
+      return res.status(404).json({ message: "Inventory item not found" });
+    }
+    res.json({ message: "Inventory item deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-async function getInventoryItem(req, res, next) {
-  let inventoryItem;
+
+
+
+// Update an inventory item
+router.put("/inventories/:id", async (req, res) => {
   try {
-    inventoryItem = await Inventory.findById(req.params.id);
-    if (inventoryItem == null) {
+    const { id } = req.params;
+    const updatedItem = await Inventory.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedItem) {
       return res.status(404).json({ message: "Inventory item not found" });
     }
+    res.json({ message: "Inventory item updated successfully", updatedItem });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
-  res.inventoryItem = inventoryItem;
-  next();
-}
+});
 
 module.exports = router;
+
+
+
